@@ -13,7 +13,29 @@ bool check_if_fixable(TournamentGraph& graph, int node)
         if(i != node && graph.wins(node, i))
             wins++;
     }
-    return wins >= log2(graph.get_size());
+    if (wins < log2(graph.get_size()))
+        return false;
+    else
+    {
+        for (int i=0; i<graph.get_size(); ++i)
+        {
+            if(i == node)
+                continue;
+            wins = 0;
+            for (int j=0; j<graph.get_size(); ++j)
+            {
+                if(i == j)
+                    continue;
+                if(graph.wins(i, j))
+                    wins++;
+                else
+                    break;
+            }
+            if(wins == graph.get_size() - 1)
+                return false;
+        }
+        return true;
+    }
 }
 
 bool check_case_A(TournamentGraph& graph, int node)
