@@ -80,6 +80,7 @@ Tournament::Tournament(const Tournament& first, const Tournament& second)
 {
     assert(first.levels.size() == second.levels.size());
     assert(first.graph == second.graph);
+    this->levels.reserve(first.levels.size() + 1);
     for (int i=0; i<first.levels.size(); ++i)
         this->levels.push_back(new Level(first.levels[i], second.levels[i]));
     this->levels.push_back(new Level(*first.graph, first.winner, second.winner));
