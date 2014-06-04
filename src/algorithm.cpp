@@ -1,9 +1,10 @@
-#include "../include/graph.h"
-#include "../include/tournament.h"
 #include <vector>
 #include <cmath>
 #include <set>
 #include <cassert>
+
+#include "../include/graph.h"
+#include "../include/tournament.h"
 
 typedef std::shared_ptr<Tournament> tournament_ptr;
 
