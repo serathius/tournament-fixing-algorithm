@@ -46,8 +46,8 @@ private:
     
 public:
     Tournament(TournamentGraph*, int, int);
+    Tournament(const Tournament&, const Tournament&);
     ~Tournament();
-    Tournament operator+(const Tournament&);
     void print();
     int get_winner();
     int get_level_count();

@@ -78,27 +78,27 @@ Tournament::Tournament(TournamentGraph* graph,
         this->winner = compatitor2;
 }
 
+Tournament::Tournament(const Tournament& first, const Tournament& second)
+{
+    assert(first.level_count == second.level_count);
+    assert(first.graph == second.graph);
+    for (int i=0; i<first.level_count; ++i)
+        this->levels.push_back(new Level(first.levels[i], second.levels[i]));
+    this->levels.push_back(new Level(*first.graph, first.winner, second.winner));
+    this->level_count = this->levels.size();
+    this->graph = first.graph;
+    if(first.graph->wins(first.winner, second.winner))
+        this->winner = first.winner;
+    else
+        this->winner = second.winner;
+}
+
 Tournament::~Tournament()
 {
     for (auto level: this->levels)
     {
         delete level;
     }
-}
-
-Tournament Tournament::operator+(const Tournament& other)
-{
-    assert(this->level_count == other.level_count);
-    assert(this->graph == other.graph);
-    std::vector<Level*> levels;
-    for (int i=0; i< other.level_count; ++i)
-        levels.push_back(new Level(this->levels[i], other.levels[i]));
-    levels.push_back(new Level(*this->graph, this->winner, other.winner));
-    if(this->graph->wins(this->winner, other.winner))
-        return Tournament(this->graph, levels, this->winner);
-    else
-        return Tournament(this->graph, levels, other.winner);
-    
 }
 
 int Tournament::get_winner()

@@ -100,7 +100,7 @@ void fix_tournament_A(TournamentGraph& graph, int node)
             i++;
             auto tournament2 = *i;
             tournaments_temp.push_back(std::unique_ptr<Tournament>(
-                new Tournament(*tournament1 + *tournament2)));
+                new Tournament(*tournament1, *tournament2)));
         }
         tournaments = tournaments_temp;
     }
