@@ -173,7 +173,14 @@ std::shared_ptr<Tournament> fix_tournament_B(TournamentGraph &graph, int node)
         for (auto i=lost_tournaments.begin(); i!=lost_tournaments.end(); ++i)
         {
             auto compatitor1 = *i;
-            ++i;
+            if (++i==lost_tournaments.end())
+            {
+                auto won_example = *won_tournaments.begin();
+                won_tournaments.erase(won_example);
+                new_lost_tournaments.insert(tournament_ptr(
+                    new Tournament(*compatitor1, *won_example)));
+                break;
+            }
             auto compatitor2 = *i;
             new_lost_tournaments.insert(tournament_ptr(
                 new Tournament(*compatitor1, *compatitor2)));
@@ -186,6 +193,7 @@ std::shared_ptr<Tournament> fix_tournament_B(TournamentGraph &graph, int node)
             {
                 new_won_tournaments.insert(tournament_ptr(
                     new Tournament(*compatitor1, Tournament(&graph, node))));
+                break;
             }
             auto compatitor2 = *i;
             new_won_tournaments.insert(tournament_ptr(
