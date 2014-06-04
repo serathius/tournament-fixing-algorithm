@@ -5,6 +5,8 @@
 #include <set>
 #include <cassert>
 
+typedef std::shared_ptr<Tournament> tournament_ptr;
+
 bool check_if_fixable(TournamentGraph& graph, int node)
 {
     int wins = 0;
@@ -66,8 +68,6 @@ bool check_if_case_A(TournamentGraph& graph, int node)
     }
     return wins > max_wins_from_losses;
 }
-
-typedef std::shared_ptr<Tournament> tournament_ptr;
 
 std::shared_ptr<Tournament> fix_tournament_A(TournamentGraph& graph, int node)
 {
