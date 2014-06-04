@@ -227,6 +227,112 @@ tournament_ptr fix_tournament_B(TournamentGraph &graph, int node)
 }
 
 
+bool check_if_case_C(TournamentGraph& graph, int node)
+{
+    std::set<int> won_with, lost_with;
+    int log2n = std::log2(graph.get_size());
+    for (int i=0;i<graph.get_size(); ++i)
+    {
+        if(i == node)
+            continue;
+        if(graph.wins(node, i))
+            won_with.insert(i);
+        else
+            lost_with.insert(i);
+    }
+    if (won_with.size() < log2n)
+        return false;
+    for (auto lose: lost_with)
+    {
+        int lose_lost_with_won_count = 0;
+        for (auto win: won_with)
+        {
+            if(graph.wins(win, lose))
+                lose_lost_with_won_count++;
+        }
+        if(lose_lost_with_won_count < log2n)
+            return false;
+    }
+    return true;
+}
+
+
+tournament_ptr fix_tournament_C(TournamentGraph& graph, int node)
+{
+    std::set<tournament_ptr> won_tournaments, lost_tournaments;
+    std::set<tournament_ptr> new_won_tournaments, new_lost_tournaments;
+    tournament_ptr node_tournament(new Tournament(&graph, node));
+    for (int i=0; i<graph.get_size(); ++i)
+    {
+        if(node == i)
+            continue;
+        if(graph.wins(node, i))
+            won_tournaments.insert(tournament_ptr(new Tournament(&graph, i)));
+        else
+            lost_tournaments.insert(tournament_ptr(new Tournament(&graph, i)));    
+    }
+    
+    while(won_tournaments.size() > 0 || lost_tournaments.size() > 0)
+    {
+        auto first_won = *won_tournaments.begin();
+        won_tournaments.erase(first_won);
+        node_tournament = tournament_ptr(
+            new Tournament(*node_tournament, *first_won));
+        
+        std::set<tournament_ptr> won_copy(won_tournaments);
+        std::set<tournament_ptr> lost_copy(lost_tournaments);
+        for(auto lose: lost_copy)
+        {
+            for(auto win: won_copy)
+            {
+                if(won_tournaments.count(win) && graph.wins(win->get_winner(), 
+                                                            lose->get_winner()))
+                {
+                    won_tournaments.erase(win);
+                    lost_tournaments.erase(lose);
+                    new_won_tournaments.insert(tournament_ptr(
+                        new Tournament(*win, *lose)));
+                    break;
+                }
+            }
+        }
+        for (auto i=lost_tournaments.begin(); i!=lost_tournaments.end(); ++i)
+        {
+            auto compatitor1 = *i;
+            if (++i==lost_tournaments.end())
+            {
+                auto won_example = *won_tournaments.begin();
+                won_tournaments.erase(won_example);
+                new_lost_tournaments.insert(tournament_ptr(
+                    new Tournament(*compatitor1, *won_example)));
+                break;
+            }
+            auto compatitor2 = *i;
+            new_lost_tournaments.insert(tournament_ptr(
+                new Tournament(*compatitor1, *compatitor2)));
+        }
+        for (auto i=won_tournaments.begin(); i!=won_tournaments.end(); ++i)
+        {
+            auto compatitor1 = *i;
+            if (++i==won_tournaments.end())
+            {
+                new_won_tournaments.insert(tournament_ptr(
+                    new Tournament(*compatitor1, Tournament(&graph, node))));
+                break;
+            }
+            auto compatitor2 = *i;
+            new_won_tournaments.insert(tournament_ptr(
+                new Tournament(*compatitor1, *compatitor2)));
+        }
+        won_tournaments = new_won_tournaments;
+        new_won_tournaments.clear();
+        lost_tournaments = new_lost_tournaments;
+        new_lost_tournaments.clear();
+    }
+    return node_tournament;
+}
+
+
 void fix_tournament(TournamentGraph& graph, int node)
 {
     if(check_if_fixable(graph, node))
@@ -242,6 +348,11 @@ void fix_tournament(TournamentGraph& graph, int node)
         {
             printf("Case B\n");
             tournament = fix_tournament_B(graph, node);
+        }
+        else if (check_if_case_C(graph, node))
+        {
+            printf("Case C\n");
+            tournament = fix_tournament_C(graph, node);
         }
         else
         {
