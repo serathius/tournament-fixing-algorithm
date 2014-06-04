@@ -69,7 +69,7 @@ bool check_if_case_A(TournamentGraph& graph, int node)
     return wins > max_wins_from_losses;
 }
 
-std::shared_ptr<Tournament> fix_tournament_A(TournamentGraph& graph, int node)
+tournament_ptr fix_tournament_A(TournamentGraph& graph, int node)
 {
     std::set<tournament_ptr> won_tournaments, lost_tournaments;
     for (int i=0; i<graph.get_size(); ++i)
@@ -135,7 +135,7 @@ bool check_if_case_B(TournamentGraph& graph, int node)
     return wins >= graph.get_size() / 2;
 }
 
-std::shared_ptr<Tournament> fix_tournament_B(TournamentGraph &graph, int node)
+tournament_ptr fix_tournament_B(TournamentGraph &graph, int node)
 {
     std::set<tournament_ptr> won_tournaments, lost_tournaments;
     std::set<tournament_ptr> new_won_tournaments, new_lost_tournaments;
