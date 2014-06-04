@@ -67,66 +67,62 @@ bool check_if_case_A(TournamentGraph& graph, int node)
     return wins > max_wins_from_losses;
 }
 
+typedef std::shared_ptr<Tournament> tournament_ptr;
+
 std::shared_ptr<Tournament> fix_tournament_A(TournamentGraph& graph, int node)
 {
-    std::set<int> won_with, lost_with;
-    std::vector<std::shared_ptr<Tournament>> tournaments;
+    std::set<tournament_ptr> won_tournaments, lost_tournaments;
+    
     for (int i=0; i<graph.get_size(); ++i)
     {
         if(node == i)
             continue;
         if(graph.wins(node, i))
-            won_with.insert(i);
+            won_tournaments.insert(tournament_ptr(new Tournament(&graph, i)));
         else
-            lost_with.insert(i);
+            lost_tournaments.insert(tournament_ptr(new Tournament(&graph, i)));    
     }
-    std::set<int> won_copy(won_with), lost_copy(lost_with);
+    std::set<tournament_ptr> new_won_tournaments;
+    std::set<tournament_ptr> won_copy(won_tournaments);
+    std::set<tournament_ptr> lost_copy(lost_tournaments);
+    
     for(auto lose: lost_copy)
     {
         for(auto win: won_copy)
         {
-            if(won_with.count(win) && graph.wins(win, lose))
+            if(won_tournaments.count(win) && graph.wins(win->get_winner(), 
+                                                        lose->get_winner()))
             {
-                won_with.erase(win);
-                lost_with.erase(lose);
-                tournaments.push_back(
-                    std::shared_ptr<Tournament>(
-                        new Tournament(&graph, win, lose)));
+                won_tournaments.erase(win);
+                lost_tournaments.erase(lose);
+                new_won_tournaments.insert(tournament_ptr(
+                    new Tournament(*win, *lose)));
                 break;
             }
         }
     }
-    assert(lost_with.size() == 0);
     
-    for (auto i = won_with.begin(); i!=won_with.end(); ++i)
+    assert(lost_tournaments.size() == 0);
+    while(won_tournaments.size() > 1)
     {
-        auto compatitor1 = *i;
-        if (++i==won_with.end())
-            break;
-        auto compatitor2 = *i;
-        tournaments.push_back(
-            std::shared_ptr<Tournament>(
-                new Tournament(&graph, compatitor1, compatitor2)));
-    }
-    auto last_element = *won_with.begin();
-    tournaments.push_back(
-        std::shared_ptr<Tournament>(
-            new Tournament(&graph, node, last_element)));
-    
-    std::vector<std::shared_ptr<Tournament>> tournaments_temp;
-    while(tournaments.size() > 1)
-    {
-        for (auto i = tournaments.begin(); i!=tournaments.end(); ++i)
+        for (auto i = won_tournaments.begin(); i!=won_tournaments.end(); ++i)
         {
-            auto tournament1 = *i;
-            i++;
-            auto tournament2 = *i;
-            tournaments_temp.push_back(std::unique_ptr<Tournament>(
-                new Tournament(*tournament1, *tournament2)));
+            auto compatitor1 = *i;
+            if (++i==won_tournaments.end())
+            {
+                new_won_tournaments.insert(tournament_ptr(
+                    new Tournament(*compatitor1, Tournament(&graph, node))));
+                break;
+            }
+            auto compatitor2 = *i;
+            new_won_tournaments.insert(tournament_ptr(
+                new Tournament(*compatitor1, *compatitor2)));
         }
-        tournaments = tournaments_temp;
+        won_tournaments = new_won_tournaments;
+        new_won_tournaments.clear();
     }
-    return tournaments[0];
+    
+    return *won_tournaments.begin();
  }
 
 bool check_if_case_B(TournamentGraph& graph, int node)
