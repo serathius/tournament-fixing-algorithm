@@ -60,7 +60,6 @@ Tournament::Tournament(TournamentGraph* graph,
                       int winner)
 {
     this->levels = levels;
-    this->level_count = levels.size();
     this->graph = graph;
     this->winner = winner;
 }
@@ -70,7 +69,6 @@ Tournament::Tournament(TournamentGraph* graph,
 {
     auto level = new Level(*graph, compatitor1, compatitor2);
     this->levels.push_back(level);
-    this->level_count = 1;
     this->graph = graph;
     if(graph->wins(compatitor1, compatitor2))
         this->winner = compatitor1;
@@ -80,12 +78,11 @@ Tournament::Tournament(TournamentGraph* graph,
 
 Tournament::Tournament(const Tournament& first, const Tournament& second)
 {
-    assert(first.level_count == second.level_count);
+    assert(first.levels.size() == second.levels.size());
     assert(first.graph == second.graph);
-    for (int i=0; i<first.level_count; ++i)
+    for (int i=0; i<first.levels.size(); ++i)
         this->levels.push_back(new Level(first.levels[i], second.levels[i]));
     this->levels.push_back(new Level(*first.graph, first.winner, second.winner));
-    this->level_count = this->levels.size();
     this->graph = first.graph;
     if(first.graph->wins(first.winner, second.winner))
         this->winner = first.winner;
@@ -108,5 +105,5 @@ int Tournament::get_winner()
 
 int Tournament::get_level_count()
 {
-    return this->level_count;
+    return this->levels.size();
 }

@@ -37,7 +37,6 @@ public:
 class Tournament
 {
     std::vector<Level*> levels;
-    int level_count;
     TournamentGraph * graph;
     int winner;
     
