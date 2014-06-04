@@ -72,7 +72,6 @@ typedef std::shared_ptr<Tournament> tournament_ptr;
 std::shared_ptr<Tournament> fix_tournament_A(TournamentGraph& graph, int node)
 {
     std::set<tournament_ptr> won_tournaments, lost_tournaments;
-    
     for (int i=0; i<graph.get_size(); ++i)
     {
         if(node == i)
@@ -169,7 +168,6 @@ std::shared_ptr<Tournament> fix_tournament_B(TournamentGraph &graph, int node)
                 }
             }
         }
-
         for (auto i=lost_tournaments.begin(); i!=lost_tournaments.end(); ++i)
         {
             auto compatitor1 = *i;
@@ -185,7 +183,6 @@ std::shared_ptr<Tournament> fix_tournament_B(TournamentGraph &graph, int node)
             new_lost_tournaments.insert(tournament_ptr(
                 new Tournament(*compatitor1, *compatitor2)));
         }
-
         for (auto i=won_tournaments.begin(); i!=won_tournaments.end(); ++i)
         {
             auto compatitor1 = *i;
@@ -221,7 +218,6 @@ std::shared_ptr<Tournament> fix_tournament_B(TournamentGraph &graph, int node)
     }
     return *won_tournaments.begin();
 }
-
 
 void fix_tournament(TournamentGraph& graph, int node)
 {
