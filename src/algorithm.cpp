@@ -6,7 +6,9 @@
 #include "../include/graph.h"
 #include "../include/tournament.h"
 
+
 typedef std::shared_ptr<Tournament> tournament_ptr;
+
 
 bool check_if_fixable(TournamentGraph& graph, int node)
 {
@@ -41,6 +43,7 @@ bool check_if_fixable(TournamentGraph& graph, int node)
     }
 }
 
+
 bool check_if_case_A(TournamentGraph& graph, int node)
 {
     int wins = 0;
@@ -69,6 +72,7 @@ bool check_if_case_A(TournamentGraph& graph, int node)
     }
     return wins > max_wins_from_losses;
 }
+
 
 tournament_ptr fix_tournament_A(TournamentGraph& graph, int node)
 {
@@ -125,6 +129,7 @@ tournament_ptr fix_tournament_A(TournamentGraph& graph, int node)
     return *won_tournaments.begin();
  }
 
+
 bool check_if_case_B(TournamentGraph& graph, int node)
 {
     int wins = 0;
@@ -135,6 +140,7 @@ bool check_if_case_B(TournamentGraph& graph, int node)
     }
     return wins >= graph.get_size() / 2;
 }
+
 
 tournament_ptr fix_tournament_B(TournamentGraph &graph, int node)
 {
@@ -219,6 +225,7 @@ tournament_ptr fix_tournament_B(TournamentGraph &graph, int node)
     }
     return *won_tournaments.begin();
 }
+
 
 void fix_tournament(TournamentGraph& graph, int node)
 {
