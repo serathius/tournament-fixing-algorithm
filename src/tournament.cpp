@@ -57,18 +57,29 @@ int Level::size()
 
 Tournament::Tournament(TournamentGraph* graph, 
                       const std::vector<Level*>& levels,
-                      int winner)
+                      const std::vector<int>& compatitors, int winner)
 {
     this->levels = levels;
+    this->compatitors = compatitors;
     this->graph = graph;
     this->winner = winner;
 }
 
-Tournament::Tournament(TournamentGraph* graph, 
-                       int compatitor1, int compatitor2) 
+Tournament::Tournament(TournamentGraph* graph, int compatitor) 
 {
-    auto level = new Level(*graph, compatitor1, compatitor2);
-    this->levels.push_back(level);
+    this->compatitors.reserve(1);
+    this->compatitors.push_back(compatitor);
+    this->graph = graph;
+    this->winner = compatitor;
+}
+
+Tournament::Tournament(TournamentGraph* graph, int compatitor1, int compatitor2) 
+{
+    this->levels.reserve(1);
+    this->levels.push_back(new Level(*graph, compatitor1, compatitor2));
+    this->compatitors.reserve(2);
+    this->compatitors.push_back(compatitor1);
+    this->compatitors.push_back(compatitor2);
     this->graph = graph;
     if(graph->wins(compatitor1, compatitor2))
         this->winner = compatitor1;

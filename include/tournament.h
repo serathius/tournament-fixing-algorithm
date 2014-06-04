@@ -37,13 +37,16 @@ public:
 class Tournament
 {
     std::vector<Level*> levels;
+    std::vector<int> compatitors;
     TournamentGraph * graph;
     int winner;
     
 private:
-    Tournament(TournamentGraph*, const std::vector<Level*>&, int);
+    Tournament(TournamentGraph*, const std::vector<Level*>&, 
+               const std::vector<int>&, int);
     
 public:
+    Tournament(TournamentGraph*, int);
     Tournament(TournamentGraph*, int, int);
     Tournament(const Tournament&, const Tournament&);
     ~Tournament();
