@@ -5,38 +5,39 @@
 
 #include "../include/graph.h"
 #include "../include/tournament.h"
+#include "../include/exceptions.h"
 
 
 typedef std::shared_ptr<Tournament> tournament_ptr;
 
 
-bool check_if_fixable(TournamentGraph& graph, int winner)
+bool check_if_fixable(TournamentGraph& graph, std::set<int>& nodes, int winner)
 {
     int wins = 0;
-    for (int i=0; i<graph.get_size(); ++i)
+    for(auto node: nodes)
     {
-        if(i != winner && graph.wins(winner, i))
+        if(node != winner && graph.wins(winner, node))
             wins++;
     }
-    if (wins < log2(graph.get_size()))
+    if (wins < log2(nodes.size()))
         return false;
     else
     {
-        for (int i=0; i<graph.get_size(); ++i)
+        for (auto node1: nodes)
         {
-            if(i == winner)
+            if(node1 == winner)
                 continue;
             wins = 0;
-            for (int j=0; j<graph.get_size(); ++j)
+            for (auto node2: nodes)
             {
-                if(i == j)
+                if(node1 == node2)
                     continue;
-                if(graph.wins(i, j))
+                if(graph.wins(node1, node2))
                     wins++;
                 else
                     break;
             }
-            if(wins == graph.get_size() - 1)
+            if(wins == nodes.size() - 1)
                 return false;
         }
         return true;
@@ -44,24 +45,24 @@ bool check_if_fixable(TournamentGraph& graph, int winner)
 }
 
 
-bool check_if_case_A(TournamentGraph& graph, int winner)
+bool check_if_case_A(TournamentGraph& graph, std::set<int>& nodes, int winner)
 {
     int wins = 0;
     int max_wins_from_losses = 0;
     int wins_from_losses;  
             
-    for (int i=0; i<graph.get_size(); ++i)
+    for(auto node1: nodes)
     {
-        if(i != winner && graph.wins(winner, i))
+        if(node1 != winner && graph.wins(winner, node1))
             wins++;
         else
         {
             wins_from_losses = 0;
-            for (int j=0; j<graph.get_size(); ++j)
+            for (auto node2: nodes)
             {
-                if(i == j)
+                if(node1 == node2)
                     break;
-                if(graph.wins(i,j))
+                if(graph.wins(node1,node2))
                     wins_from_losses++;
             }
             if(wins_from_losses > max_wins_from_losses)
@@ -74,17 +75,20 @@ bool check_if_case_A(TournamentGraph& graph, int winner)
 }
 
 
-tournament_ptr fix_tournament_A(TournamentGraph& graph, int winner)
+tournament_ptr fix_tournament_A(TournamentGraph& graph, 
+                                std::set<int>& nodes, int winner)
 {
     std::set<tournament_ptr> won_tournaments, lost_tournaments;
-    for (int i=0; i<graph.get_size(); ++i)
+    for(auto node: nodes)
     {
-        if(winner == i)
+        if(winner == node)
             continue;
-        if(graph.wins(winner, i))
-            won_tournaments.insert(tournament_ptr(new Tournament(&graph, i)));
+        if(graph.wins(winner, node))
+            won_tournaments.insert(
+                tournament_ptr(new Tournament(&graph, node)));
         else
-            lost_tournaments.insert(tournament_ptr(new Tournament(&graph, i)));    
+            lost_tournaments.insert(
+                tournament_ptr(new Tournament(&graph, node)));    
     }
     std::set<tournament_ptr> new_won_tournaments;
     std::set<tournament_ptr> won_copy(won_tournaments);
@@ -130,30 +134,33 @@ tournament_ptr fix_tournament_A(TournamentGraph& graph, int winner)
  }
 
 
-bool check_if_case_B(TournamentGraph& graph, int winner)
+bool check_if_case_B(TournamentGraph& graph, std::set<int>& nodes, int winner)
 {
     int wins = 0;
-    for (int i=0; i<graph.get_size(); ++i)
+    for(auto node: nodes)
     {
-        if(i != winner && graph.wins(winner, i))
+        if(node != winner && graph.wins(winner, node))
             wins++;
     }
-    return wins >= graph.get_size() / 2;
+    return wins >= nodes.size() / 2;
 }
 
 
-tournament_ptr fix_tournament_B(TournamentGraph &graph, int winner)
+tournament_ptr fix_tournament_B(TournamentGraph &graph, 
+                                std::set<int>& nodes, int winner)
 {
     std::set<tournament_ptr> won_tournaments, lost_tournaments;
     std::set<tournament_ptr> new_won_tournaments, new_lost_tournaments;
-    for (int i=0; i<graph.get_size(); ++i)
+    for (auto node: nodes)
     {
-        if(winner == i)
+        if(winner == node)
             continue;
-        if(graph.wins(winner, i))
-            won_tournaments.insert(tournament_ptr(new Tournament(&graph, i)));
+        if(graph.wins(winner, node))
+            won_tournaments.insert(
+                tournament_ptr(new Tournament(&graph, node)));
         else
-            lost_tournaments.insert(tournament_ptr(new Tournament(&graph, i)));    
+            lost_tournaments.insert(
+                tournament_ptr(new Tournament(&graph, node)));    
     }
     while(lost_tournaments.size() > 0)
     {
@@ -227,18 +234,18 @@ tournament_ptr fix_tournament_B(TournamentGraph &graph, int winner)
 }
 
 
-bool check_if_case_C(TournamentGraph& graph, int winner)
+bool check_if_case_C(TournamentGraph& graph, std::set<int>& nodes, int winner)
 {
     std::set<int> won_with, lost_with;
-    int log2n = std::log2(graph.get_size());
-    for (int i=0;i<graph.get_size(); ++i)
+    int log2n = std::log2(nodes.size());
+    for (auto node: nodes)
     {
-        if(i == winner)
+        if(node == winner)
             continue;
-        if(graph.wins(winner, i))
-            won_with.insert(i);
+        if(graph.wins(winner, node))
+            won_with.insert(node);
         else
-            lost_with.insert(i);
+            lost_with.insert(node);
     }
     if (won_with.size() < log2n)
         return false;
@@ -257,27 +264,30 @@ bool check_if_case_C(TournamentGraph& graph, int winner)
 }
 
 
-tournament_ptr fix_tournament_C(TournamentGraph& graph, int winner)
+tournament_ptr fix_tournament_C(TournamentGraph& graph, 
+                                std::set<int>& nodes, int winner)
 {
     std::set<tournament_ptr> won_tournaments, lost_tournaments;
     std::set<tournament_ptr> new_won_tournaments, new_lost_tournaments;
-    tournament_ptr node_tournament(new Tournament(&graph, winner));
-    for (int i=0; i<graph.get_size(); ++i)
+    tournament_ptr winner_tournament(new Tournament(&graph, winner));
+    for (auto node: nodes)
     {
-        if(winner == i)
+        if(winner == node)
             continue;
-        if(graph.wins(winner, i))
-            won_tournaments.insert(tournament_ptr(new Tournament(&graph, i)));
+        if(graph.wins(winner, node))
+            won_tournaments.insert(
+                tournament_ptr(new Tournament(&graph, node)));
         else
-            lost_tournaments.insert(tournament_ptr(new Tournament(&graph, i)));    
+            lost_tournaments.insert(
+                tournament_ptr(new Tournament(&graph, node)));    
     }
     
     while(won_tournaments.size() > 0 || lost_tournaments.size() > 0)
     {
         auto first_won = *won_tournaments.begin();
         won_tournaments.erase(first_won);
-        node_tournament = tournament_ptr(
-            new Tournament(*node_tournament, *first_won));
+        winner_tournament = tournament_ptr(
+            new Tournament(*winner_tournament, *first_won));
         
         std::set<tournament_ptr> won_copy(won_tournaments);
         std::set<tournament_ptr> lost_copy(lost_tournaments);
@@ -329,31 +339,21 @@ tournament_ptr fix_tournament_C(TournamentGraph& graph, int winner)
         lost_tournaments = new_lost_tournaments;
         new_lost_tournaments.clear();
     }
-    return node_tournament;
+    return winner_tournament;
 }
 
 
-void fix_tournament(TournamentGraph& graph, int winner)
+tournament_ptr _fix_tournament(TournamentGraph& graph, 
+                               std::set<int>& nodes, int winner)
 {
-    if(check_if_fixable(graph, winner))
+    if(check_if_fixable(graph, nodes, winner))
     {
-        std::shared_ptr<Tournament> tournament;
-        printf("Fixable\n");
-        if (check_if_case_A(graph, winner))
-        {
-            printf("Case A\n");    
-            tournament = fix_tournament_A(graph, winner);
-        }
-        else if (check_if_case_B(graph, winner))
-        {
-            printf("Case B\n");
-            tournament = fix_tournament_B(graph, winner);
-        }
-        else if (check_if_case_C(graph, winner))
-        {
-            printf("Case C\n");
-            tournament = fix_tournament_C(graph, winner);
-        }
+        if (check_if_case_A(graph, nodes, winner)) 
+            return fix_tournament_A(graph, nodes, winner);
+        else if (check_if_case_B(graph, nodes, winner))
+            return fix_tournament_B(graph, nodes, winner);
+        else if (check_if_case_C(graph, nodes, winner))
+            return fix_tournament_C(graph, nodes, winner);
         else
         {
             printf("Worst Case");
@@ -361,7 +361,15 @@ void fix_tournament(TournamentGraph& graph, int winner)
     }
     else
     {
-        printf("Unfixable\n");
+        throw TournamentUnfixableError();
     }
-    
+}
+
+
+void fix_tournament(TournamentGraph& graph, int winner)
+{
+    std::set<int> nodes;
+    for (int i=0; i<graph.get_size(); ++i)
+        nodes.insert(i);
+    tournament_ptr tournament = _fix_tournament(graph, nodes, winner);
 }
