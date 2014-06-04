@@ -67,7 +67,7 @@ bool check_case_A(TournamentGraph& graph, int node)
     return wins > max_wins_from_losses;
 }
 
-void fix_tournament_A(TournamentGraph& graph, int node)
+std::shared_ptr<Tournament> fix_tournament_A(TournamentGraph& graph, int node)
 {
     std::set<int> won_with, lost_with;
     std::vector<std::shared_ptr<Tournament>> tournaments;
@@ -126,16 +126,28 @@ void fix_tournament_A(TournamentGraph& graph, int node)
         }
         tournaments = tournaments_temp;
     }
-    printf("%d\n",tournaments[0]->get_winner());
+    return tournaments[0];
  }
 
 void fix_tournament(TournamentGraph& graph, int node)
 {
     if(check_if_fixable(graph, node))
-        printf("Solvable\n");
-    if (check_case_A(graph, node))
     {
-        printf("Case A\n");    
-        fix_tournament_A(graph, node);
+        std::shared_ptr<Tournament> tournament;
+        printf("Fixable\n");
+        if (check_case_A(graph, node))
+        {
+            printf("Case A\n");    
+            tournament = fix_tournament_A(graph, node);
+        }
+        else
+        {
+            printf("Worst Case");
+        }
     }
+    else
+    {
+        printf("Unfixable\n");
+    }
+    
 }
