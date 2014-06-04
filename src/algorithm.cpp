@@ -38,7 +38,7 @@ bool check_if_fixable(TournamentGraph& graph, int node)
     }
 }
 
-bool check_case_A(TournamentGraph& graph, int node)
+bool check_if_case_A(TournamentGraph& graph, int node)
 {
     int wins = 0;
     int max_wins_from_losses = 0;
@@ -129,7 +129,7 @@ std::shared_ptr<Tournament> fix_tournament_A(TournamentGraph& graph, int node)
     return tournaments[0];
  }
 
-bool check_case_B(TournamentGraph& graph, int node)
+bool check_if_case_B(TournamentGraph& graph, int node)
 {
     int wins = 0;
     for (int i=0; i<graph.get_size(); ++i)
@@ -277,12 +277,12 @@ void fix_tournament(TournamentGraph& graph, int node)
     {
         std::shared_ptr<Tournament> tournament;
         printf("Fixable\n");
-        if (check_case_A(graph, node))
+        if (check_if_case_A(graph, node))
         {
             printf("Case A\n");    
             tournament = fix_tournament_A(graph, node);
         }
-        else if (check_case_B(graph, node))
+        else if (check_if_case_B(graph, node))
         {
             printf("Case B\n");
             tournament = fix_tournament_B(graph, node);
