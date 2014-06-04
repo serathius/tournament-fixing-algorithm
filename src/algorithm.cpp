@@ -138,132 +138,80 @@ bool check_if_case_B(TournamentGraph& graph, int node)
 
 std::shared_ptr<Tournament> fix_tournament_B(TournamentGraph &graph, int node)
 {
-    std::set<int> won_with, lost_with;
-    std::set<std::shared_ptr<Tournament>> won_subtournaments;
-    std::set<std::shared_ptr<Tournament>> lost_subtournaments;
-    
+    std::set<tournament_ptr> won_tournaments, lost_tournaments;
+    std::set<tournament_ptr> new_won_tournaments, new_lost_tournaments;
     for (int i=0; i<graph.get_size(); ++i)
     {
         if(node == i)
             continue;
         if(graph.wins(node, i))
-            won_with.insert(i);
+            won_tournaments.insert(tournament_ptr(new Tournament(&graph, i)));
         else
-            lost_with.insert(i);
+            lost_tournaments.insert(tournament_ptr(new Tournament(&graph, i)));    
     }
-    std::set<int> won_copy(won_with), lost_copy(lost_with);
-    for(auto lose: lost_copy)
+    while(lost_tournaments.size() > 0)
     {
-        for(auto win: won_copy)
+        std::set<tournament_ptr> won_copy(won_tournaments);
+        std::set<tournament_ptr> lost_copy(lost_tournaments);
+
+        for(auto lose: lost_copy)
         {
-            if(won_with.count(win) && graph.wins(win, lose))
+            for(auto win: won_copy)
             {
-                won_with.erase(win);
-                lost_with.erase(lose);
-                won_subtournaments.insert(
-                    std::shared_ptr<Tournament>(
-                        new Tournament(&graph, win, lose)));
-                break;
-            }
-        }
-    }    
-    for (auto i = lost_with.begin(); i!=lost_with.end(); ++i)
-    {
-        auto compatitor1 = *i;
-        if (++i==lost_with.end())
-            break;
-        auto compatitor2 = *i;
-        lost_subtournaments.insert(
-            std::shared_ptr<Tournament>(
-                new Tournament(&graph, compatitor1, compatitor2)));
-    }
-    for (auto i = won_with.begin(); i!=won_with.end(); ++i)
-    {
-        auto compatitor1 = *i;
-        if (++i==won_with.end())
-        {
-            won_subtournaments.insert(
-                std::shared_ptr<Tournament>(
-                    new Tournament(&graph, node, compatitor1)));
-            break;
-        }
-        auto compatitor2 = *i;
-        won_subtournaments.insert(
-            std::shared_ptr<Tournament>(
-                new Tournament(&graph, compatitor1, compatitor2)));
-    }
-    
-    while(lost_subtournaments.size() > 0)
-    {
-        auto lost_subtournaments_copy = lost_subtournaments;
-        auto won_subtournaments_copy = won_subtournaments;
-        std::set<std::shared_ptr<Tournament>> new_lost_subtournaments;
-        std::set<std::shared_ptr<Tournament>> new_won_subtournaments;
-        for(auto lose: lost_subtournaments_copy)
-        {
-            for(auto win: won_subtournaments_copy)
-            {
-                if(won_subtournaments.count(win) && graph.wins(
-                    win->get_winner(), lose->get_winner()))
+                if(won_tournaments.count(win) && graph.wins(win->get_winner(), 
+                                                            lose->get_winner()))
                 {
-                    won_subtournaments.erase(win);
-                    lost_subtournaments.erase(lose);
-                    new_won_subtournaments.insert(
-                        std::shared_ptr<Tournament>(
-                            new Tournament(*win, *lose)));
+                    won_tournaments.erase(win);
+                    lost_tournaments.erase(lose);
+                    new_won_tournaments.insert(tournament_ptr(
+                        new Tournament(*win, *lose)));
                     break;
                 }
             }
         }
-        for (auto i = lost_subtournaments.begin(); 
-             i!=lost_subtournaments.end(); ++i)
+
+        for (auto i=lost_tournaments.begin(); i!=lost_tournaments.end(); ++i)
         {
             auto compatitor1 = *i;
-            if (++i==lost_subtournaments.end())
-            {
-                new_lost_subtournaments.insert(compatitor1);
-                break;
-            }
+            ++i;
             auto compatitor2 = *i;
-            new_lost_subtournaments.insert(
-                std::shared_ptr<Tournament>(
-                    new Tournament(*compatitor1, *compatitor2)));
+            new_lost_tournaments.insert(tournament_ptr(
+                new Tournament(*compatitor1, *compatitor2)));
         }
-        for (auto i = won_subtournaments.begin(); i!=won_subtournaments.end(); ++i)
+
+        for (auto i=won_tournaments.begin(); i!=won_tournaments.end(); ++i)
         {
             auto compatitor1 = *i;
-            if (++i==won_subtournaments.end())
+            if (++i==won_tournaments.end())
             {
-                new_won_subtournaments.insert(compatitor1);
-                break;
+                new_won_tournaments.insert(tournament_ptr(
+                    new Tournament(*compatitor1, Tournament(&graph, node))));
             }
             auto compatitor2 = *i;
-            new_won_subtournaments.insert(
-                std::shared_ptr<Tournament>(
-                    new Tournament(*compatitor1, *compatitor2)));
+            new_won_tournaments.insert(tournament_ptr(
+                new Tournament(*compatitor1, *compatitor2)));
         }
-        lost_subtournaments = new_lost_subtournaments;
-        won_subtournaments = new_won_subtournaments;
+        won_tournaments = new_won_tournaments;
+        new_won_tournaments.clear();
+        lost_tournaments = new_lost_tournaments;
+        new_lost_tournaments.clear();
     }
-    while(won_subtournaments.size() > 1)
+    
+    while(won_tournaments.size() > 1)
     {
-        std::set<std::shared_ptr<Tournament>> new_won_subtournaments;
-        for (auto i = won_subtournaments.begin(); i!=won_subtournaments.end(); ++i)
+        for (auto i = won_tournaments.begin(); i!=won_tournaments.end(); ++i)
         {
             auto compatitor1 = *i;
-            if (++i==won_subtournaments.end())
-            {
-                new_won_subtournaments.insert(compatitor1);
-                break;
-            }
+            ++i;
             auto compatitor2 = *i;
-            new_won_subtournaments.insert(
+            new_won_tournaments.insert(
                 std::shared_ptr<Tournament>(
                     new Tournament(*compatitor1, *compatitor2)));
         }
-        won_subtournaments = new_won_subtournaments;
+        won_tournaments = new_won_tournaments;
+        new_won_tournaments.clear();
     }
-    return *won_subtournaments.begin();
+    return *won_tournaments.begin();
 }
 
 
