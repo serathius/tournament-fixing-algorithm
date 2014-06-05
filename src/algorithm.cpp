@@ -10,6 +10,27 @@
 
 
 typedef std::shared_ptr<Tournament> tournament_ptr;
+std::set<tournament_ptr> match_won_with_lost(TournamentGraph& graph,
+                                             std::set<tournament_ptr>& won, 
+                                             std::set<tournament_ptr>& lost)
+{
+    std::set<tournament_ptr> won_copy(won), lost_copy(lost), new_won;
+    for(auto lose: lost_copy)
+    {
+        for(auto win: won_copy)
+        {
+            if(won.count(win) && graph.wins(win->get_winner(), 
+                                            lose->get_winner()))
+            {
+                won.erase(win);
+                lost.erase(lose);
+                new_won.insert(tournament_ptr(new Tournament(*win, *lose)));
+                break;
+            }
+        }
+    }
+    return new_won;
+}
 
 
 bool check_if_fixable(TournamentGraph& graph, std::set<int>& nodes, int winner)
@@ -92,25 +113,8 @@ tournament_ptr fix_tournament_A(TournamentGraph& graph,
             lost_tournaments.insert(
                 tournament_ptr(new Tournament(&graph, node)));    
     }
-    std::set<tournament_ptr> new_won_tournaments;
-    std::set<tournament_ptr> won_copy(won_tournaments);
-    std::set<tournament_ptr> lost_copy(lost_tournaments);
-    
-    for(auto lose: lost_copy)
-    {
-        for(auto win: won_copy)
-        {
-            if(won_tournaments.count(win) && graph.wins(win->get_winner(), 
-                                                        lose->get_winner()))
-            {
-                won_tournaments.erase(win);
-                lost_tournaments.erase(lose);
-                new_won_tournaments.insert(tournament_ptr(
-                    new Tournament(*win, *lose)));
-                break;
-            }
-        }
-    }
+    std::set<tournament_ptr> new_won_tournaments(
+        match_won_with_lost(graph, won_tournaments, lost_tournaments));
     
     assert(lost_tournaments.size() == 0);
     do
@@ -166,24 +170,9 @@ tournament_ptr fix_tournament_B(TournamentGraph &graph,
     }
     while(lost_tournaments.size() > 0)
     {
-        std::set<tournament_ptr> won_copy(won_tournaments);
-        std::set<tournament_ptr> lost_copy(lost_tournaments);
-
-        for(auto lose: lost_copy)
-        {
-            for(auto win: won_copy)
-            {
-                if(won_tournaments.count(win) && graph.wins(win->get_winner(), 
-                                                            lose->get_winner()))
-                {
-                    won_tournaments.erase(win);
-                    lost_tournaments.erase(lose);
-                    new_won_tournaments.insert(tournament_ptr(
-                        new Tournament(*win, *lose)));
-                    break;
-                }
-            }
-        }
+        new_won_tournaments = match_won_with_lost(graph, won_tournaments,
+                                                  lost_tournaments);
+        
         for (auto i=lost_tournaments.begin(); i!=lost_tournaments.end(); ++i)
         {
             auto compatitor1 = *i;
@@ -291,23 +280,8 @@ tournament_ptr fix_tournament_C(TournamentGraph& graph,
         winner_tournament = tournament_ptr(
             new Tournament(*winner_tournament, *first_won));
         
-        std::set<tournament_ptr> won_copy(won_tournaments);
-        std::set<tournament_ptr> lost_copy(lost_tournaments);
-        for(auto lose: lost_copy)
-        {
-            for(auto win: won_copy)
-            {
-                if(won_tournaments.count(win) && graph.wins(win->get_winner(), 
-                                                            lose->get_winner()))
-                {
-                    won_tournaments.erase(win);
-                    lost_tournaments.erase(lose);
-                    new_won_tournaments.insert(tournament_ptr(
-                        new Tournament(*win, *lose)));
-                    break;
-                }
-            }
-        }
+        new_won_tournaments = match_won_with_lost(graph, won_tournaments,
+                                                  lost_tournaments);
         for (auto i=lost_tournaments.begin(); i!=lost_tournaments.end(); ++i)
         {
             auto compatitor1 = *i;
