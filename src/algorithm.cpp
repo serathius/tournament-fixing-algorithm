@@ -357,8 +357,7 @@ tournament_ptr _fix_tournament(TournamentGraph& graph,
         else if (check_if_case_C(graph, nodes, winner))
             return fix_tournament_C(graph, nodes, winner);
         else
-        {
-            printf("Worst Case");
+        {   
             int log2n = log2(nodes.size());
             std::set<int> won_with;
             
