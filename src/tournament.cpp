@@ -75,7 +75,7 @@ Tournament::Tournament(TournamentGraph* graph,
                       const std::vector<Level*>& levels,
                       const std::vector<int>& compatitors, int winner)
 {
-    this->levels = levels;
+    this->rounds = levels;
     this->compatitors = compatitors;
     this->graph = graph;
     this->winner = winner;
@@ -91,8 +91,8 @@ Tournament::Tournament(TournamentGraph* graph, int compatitor)
 
 Tournament::Tournament(TournamentGraph* graph, int compatitor1, int compatitor2) 
 {
-    this->levels.reserve(1);
-    this->levels.push_back(new Level(*graph, compatitor1, compatitor2));
+    this->rounds.reserve(1);
+    this->rounds.push_back(new Level(*graph, compatitor1, compatitor2));
     this->compatitors.reserve(2);
     this->compatitors.push_back(compatitor1);
     this->compatitors.push_back(compatitor2);
@@ -105,12 +105,12 @@ Tournament::Tournament(TournamentGraph* graph, int compatitor1, int compatitor2)
 
 Tournament::Tournament(const Tournament& first, const Tournament& second)
 {
-    assert(first.levels.size() == second.levels.size());
+    assert(first.rounds.size() == second.rounds.size());
     assert(first.graph == second.graph);
-    this->levels.reserve(first.levels.size() + 1);
-    for (int i=0; i<first.levels.size(); ++i)
-        this->levels.push_back(new Level(first.levels[i], second.levels[i]));
-    this->levels.push_back(new Level(
+    this->rounds.reserve(first.rounds.size() + 1);
+    for (int i=0; i<first.rounds.size(); ++i)
+        this->rounds.push_back(new Level(first.rounds[i], second.rounds[i]));
+    this->rounds.push_back(new Level(
         *first.graph, first.winner, second.winner));
 
     this->graph = first.graph;
@@ -122,7 +122,7 @@ Tournament::Tournament(const Tournament& first, const Tournament& second)
 
 Tournament::~Tournament()
 {
-    for (auto level: this->levels)
+    for (auto level: this->rounds)
     {
         delete level;
     }
@@ -130,19 +130,14 @@ Tournament::~Tournament()
 
 void Tournament::print()
 {
-    for(int i=0; i<this->levels.size(); ++i)
+    for(int i=0; i<this->rounds.size(); ++i)
     {
-        printf("Level %d\n", i);
-        this->levels[i]->print();
+        printf("Round %d\n", i + 1);
+        this->rounds[i]->print();
     }
 }
 
 int Tournament::get_winner()
 {
     return this->winner;
-}
-
-int Tournament::get_level_count()
-{
-    return this->levels.size();
 }

@@ -38,7 +38,7 @@ public:
 
 class Tournament
 {
-    std::vector<Level*> levels;
+    std::vector<Level*> rounds;
     std::vector<int> compatitors;
     TournamentGraph * graph;
     int winner;
@@ -54,7 +54,6 @@ public:
     ~Tournament();
     void print();
     int get_winner();
-    int get_level_count();
 };
 
 #endif	/* TOURNAMENT_H */
