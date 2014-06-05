@@ -73,7 +73,7 @@ bool check_if_case_A(TournamentGraph& graph, std::set<int>& nodes, int winner)
             }
         }
     }
-    return wins > max_wins_from_losses;
+    return wins >= max_wins_from_losses;
 }
 
 
