@@ -8,5 +8,11 @@ class TournamentUnfixableError : public std::exception
     
 };
 
+
+class StopIterationError : public std::exception
+{
+    
+};
+
 #endif	/* EXCEPTIONS_H */
 

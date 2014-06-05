@@ -2,7 +2,7 @@ TEST_SYSTEM_FLAGS = -isystem gtest-1.7.0/include -isystem gmock-1.7.0/include
 TEST_I_FLAGS = -I gtest-1.7.0 -I gmock-1.7.0
 TESTS = tests/test_simple.cpp
 TEST_OBJECTS = $(TESTS:.cpp=.o)
-SOURCES = src/graph.cpp src/algorithm.cpp src/tournament.cpp
+SOURCES = src/graph.cpp src/algorithm.cpp src/tournament.cpp src/iterators.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 CFLAGS = -std=c++11
 	

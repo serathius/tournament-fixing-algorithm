@@ -6,6 +6,7 @@
 #include "../include/graph.h"
 #include "../include/tournament.h"
 #include "../include/exceptions.h"
+#include "../include/iterators.h"
 
 
 typedef std::shared_ptr<Tournament> tournament_ptr;
@@ -358,6 +359,72 @@ tournament_ptr _fix_tournament(TournamentGraph& graph,
         else
         {
             printf("Worst Case");
+            int log2n = log2(nodes.size());
+            std::set<int> won_with;
+            
+            nodes.erase(winner);
+            for(auto node: nodes)
+            {
+                if(graph.wins(winner, node))
+                    won_with.insert(node);
+            }
+
+            CombinationIterator won_iter(won_with, log2n);
+            while(true)
+            {
+                try
+                {
+                    int size = 2;
+                    std::set<int> nodes_copy(nodes);
+                    std::vector<int> wins(won_iter.next());
+                    for (auto win: wins)
+                    {
+                        nodes_copy.erase(win);
+                    }
+                    int first_win = wins.back();
+                    wins.pop_back();
+                    tournament_ptr tournament_copy(tournament_ptr(
+                        new Tournament(&graph, winner, first_win)));
+                    for(auto win: wins)
+                    {
+                        CombinationIterator combinations_iter(
+                            nodes_copy, size - 1);
+                        while(true)
+                        {
+                            try
+                            {
+                                std::set<int> rest(
+                                    combinations_iter.next_set());
+                                rest.insert(win);
+                                tournament_ptr t = _fix_tournament(graph, rest, win);
+                                tournament_copy = tournament_ptr(new Tournament(
+                                    *t, *tournament_copy));
+                                break;
+                                 
+                            }
+                            catch(TournamentUnfixableError)
+                            {
+                                
+                            }
+                            catch(StopIterationError)
+                            {
+                                throw TournamentUnfixableError();
+                            }
+                        }
+                        size *= 2;
+                    }
+                    return tournament_copy;
+                    
+                }
+                catch(TournamentUnfixableError)
+                {
+                    
+                }
+                catch(StopIterationError)
+                {
+                    throw TournamentUnfixableError();
+                }
+            }
         }
     }
     else
@@ -372,5 +439,12 @@ void fix_tournament(TournamentGraph& graph, int winner)
     std::set<int> nodes;
     for (int i=0; i<graph.get_size(); ++i)
         nodes.insert(i);
-    tournament_ptr tournament = _fix_tournament(graph, nodes, winner);
+    try
+    {
+        tournament_ptr tournament = _fix_tournament(graph, nodes, winner);
+    }
+    catch(TournamentUnfixableError)
+    {
+        printf("Unfixable\n");
+    }
 }
