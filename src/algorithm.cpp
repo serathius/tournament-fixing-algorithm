@@ -4,13 +4,13 @@
 #include <cassert>
 #include <algorithm>
 
+#include "../include/algorithm.h"
 #include "../include/graph.h"
 #include "../include/tournament.h"
 #include "../include/exceptions.h"
 #include "../include/iterators.h"
 
 
-typedef std::shared_ptr<Tournament> tournament_ptr;
 std::set<tournament_ptr> match_won_with_lost(TournamentGraph& graph,
                                              std::set<tournament_ptr>& won, 
                                              std::set<tournament_ptr>& lost)
@@ -459,18 +459,10 @@ tournament_ptr _fix_tournament(TournamentGraph& graph,
 }
 
 
-void fix_tournament(TournamentGraph& graph, int winner)
+tournament_ptr fix_tournament(TournamentGraph& graph, int winner)
 {
     std::set<int> nodes;
     for (int i=0; i<graph.get_size(); ++i)
         nodes.insert(i);
-    try
-    {
-        tournament_ptr tournament = _fix_tournament(graph, nodes, winner);
-        tournament->print();
-    }
-    catch(TournamentUnfixableError)
-    {
-        printf("Unfixable\n");
-    }
+    return _fix_tournament(graph, nodes, winner);
 }
