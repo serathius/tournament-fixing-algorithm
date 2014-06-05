@@ -14,6 +14,12 @@ Match::Match(TournamentGraph& graph,
     this->looser = compatitor2;
 }
 
+void Match::print()
+{
+    printf("%d wins with %d\n", this->winner, this->looser);
+}
+
+
 int Match::get_winner()
 {
     return this->winner;
@@ -49,6 +55,16 @@ Level::~Level()
 {
     
 }
+
+
+void Level::print()
+{
+    for (auto match: this->matches)
+    {
+        match->print();
+    }
+}
+
 
 int Level::size()
 {
@@ -107,6 +123,15 @@ Tournament::~Tournament()
     for (auto level: this->levels)
     {
         delete level;
+    }
+}
+
+void Tournament::print()
+{
+    for(int i=0; i<this->levels.size(); ++i)
+    {
+        printf("Level %d\n", i);
+        this->levels[i]->print();
     }
 }
 

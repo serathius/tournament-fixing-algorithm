@@ -13,6 +13,7 @@ class Match
 
 public:
     Match(TournamentGraph&, int, int);
+    void print();
     int get_looser();
     int get_winner();
 };
@@ -31,6 +32,7 @@ public:
     Level(TournamentGraph&, int, int);
     Level(const Level&);
     ~Level();
+    void print();
     int size();
 };
 

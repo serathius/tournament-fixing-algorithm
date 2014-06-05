@@ -442,6 +442,7 @@ void fix_tournament(TournamentGraph& graph, int winner)
     try
     {
         tournament_ptr tournament = _fix_tournament(graph, nodes, winner);
+        tournament->print();
     }
     catch(TournamentUnfixableError)
     {
