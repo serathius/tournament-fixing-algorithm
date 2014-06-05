@@ -50,10 +50,11 @@ bool check_if_case_A(TournamentGraph& graph, std::set<int>& nodes, int winner)
     int wins = 0;
     int max_wins_from_losses = 0;
     int wins_from_losses;  
-            
     for(auto node1: nodes)
     {
-        if(node1 != winner && graph.wins(winner, node1))
+        if(node1 == winner)
+            continue;
+        if(graph.wins(winner, node1))
             wins++;
         else
         {
@@ -61,8 +62,8 @@ bool check_if_case_A(TournamentGraph& graph, std::set<int>& nodes, int winner)
             for (auto node2: nodes)
             {
                 if(node1 == node2)
-                    break;
-                if(graph.wins(node1,node2))
+                    continue;
+                if(graph.wins(node1, node2))
                     wins_from_losses++;
             }
             if(wins_from_losses > max_wins_from_losses)
@@ -111,7 +112,7 @@ tournament_ptr fix_tournament_A(TournamentGraph& graph,
     }
     
     assert(lost_tournaments.size() == 0);
-    while(won_tournaments.size() > 1)
+    do
     {
         for (auto i = won_tournaments.begin(); i!=won_tournaments.end(); ++i)
         {
@@ -129,7 +130,7 @@ tournament_ptr fix_tournament_A(TournamentGraph& graph,
         won_tournaments = new_won_tournaments;
         new_won_tournaments.clear();
     }
-    
+    while (won_tournaments.size() > 1);
     return *won_tournaments.begin();
  }
 
