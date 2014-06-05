@@ -54,34 +54,44 @@ std::set<tournament_ptr> match_won_with_lost(TournamentGraph& graph,
 
 bool check_if_fixable(TournamentGraph& graph, std::set<int>& nodes, int winner)
 {
-    int wins = 0;
+    std::set<int> won_with, lost_with;
     for(auto node: nodes)
     {
-        if(node != winner && graph.wins(winner, node))
-            wins++;
+        if(node == winner)
+            continue;
+        if(graph.wins(winner, node))
+            won_with.insert(node);
+        else
+            lost_with.insert(node);
     }
-    if (wins < log2(nodes.size()))
+    if (won_with.size() < log2(nodes.size()))
         return false;
     else
     {
-        for (auto node1: nodes)
+        std::set<int> new_won, new_lost(lost_with);
+        while(true)
         {
-            if(node1 == winner)
-                continue;
-            wins = 0;
-            for (auto node2: nodes)
+            for(auto win: won_with)
             {
-                if(node1 == node2)
-                    continue;
-                if(graph.wins(node1, node2))
-                    wins++;
-                else
-                    break;
+                for(auto lose: lost_with)
+                {
+                    if(new_lost.count(lose) && graph.wins(win, lose))
+                    {
+                        new_won.insert(lose);
+                        new_lost.erase(lose);
+                        break;
+                    }
+                }
             }
-            if(wins == nodes.size() - 1)
+            if(new_lost.size() == 0)
+                return true;
+            if(new_won.size() == 0)
                 return false;
+            won_with = new_won;
+            lost_with = new_lost;
+            new_won.clear();
+            new_lost.clear();
         }
-        return true;
     }
 }
 
