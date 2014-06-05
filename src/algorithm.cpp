@@ -171,13 +171,33 @@ tournament_ptr fix_tournament_A(TournamentGraph& graph,
 
 bool check_if_case_B(TournamentGraph& graph, std::set<int>& nodes, int winner)
 {
-    int wins = 0;
+    std::set<int> won_with, lost_with;
     for(auto node: nodes)
     {
-        if(node != winner && graph.wins(winner, node))
-            wins++;
+        if(node == winner)
+            continue;
+        if(graph.wins(winner, node))
+            won_with.insert(node);
+        else
+            lost_with.insert(node);
     }
-    return wins >= nodes.size() / 2;
+    if(won_with.size() < nodes.size() / 2)
+        return false;
+    for(auto lose: lost_with)
+    {
+        bool flag = true;
+        for(auto win: won_with)
+        {
+            if(graph.wins(win, lose))
+            {   
+                flag = false;
+                break;
+            }
+        }
+        if(flag)
+            return false;
+    }
+    return true;
 }
 
 
@@ -197,11 +217,19 @@ tournament_ptr fix_tournament_B(TournamentGraph &graph,
             lost_tournaments.insert(
                 tournament_ptr(new Tournament(&graph, node)));    
     }
+    bool flag = true;
     while(lost_tournaments.size() > 0)
     {
         new_won_tournaments = match_won_with_lost(graph, won_tournaments,
-                                                  lost_tournaments);
-        
+                                                  lost_tournaments);     
+        if (flag)
+        {
+            auto first_won = *won_tournaments.begin();
+            new_won_tournaments.insert(tournament_ptr(
+                new Tournament(*first_won, Tournament(&graph, winner))));
+            won_tournaments.erase(first_won);
+            flag = false;
+        }
         for (auto i=lost_tournaments.begin(); i!=lost_tournaments.end(); ++i)
         {
             auto compatitor1 = *i;
@@ -220,12 +248,7 @@ tournament_ptr fix_tournament_B(TournamentGraph &graph,
         for (auto i=won_tournaments.begin(); i!=won_tournaments.end(); ++i)
         {
             auto compatitor1 = *i;
-            if (++i==won_tournaments.end())
-            {
-                new_won_tournaments.insert(tournament_ptr(
-                    new Tournament(*compatitor1, Tournament(&graph, winner))));
-                break;
-            }
+            i++;
             auto compatitor2 = *i;
             new_won_tournaments.insert(tournament_ptr(
                 new Tournament(*compatitor1, *compatitor2)));
