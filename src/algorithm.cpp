@@ -2,6 +2,7 @@
 #include <cmath>
 #include <set>
 #include <cassert>
+#include <algorithm>
 
 #include "../include/graph.h"
 #include "../include/tournament.h"
@@ -14,9 +15,27 @@ std::set<tournament_ptr> match_won_with_lost(TournamentGraph& graph,
                                              std::set<tournament_ptr>& won, 
                                              std::set<tournament_ptr>& lost)
 {
-    std::set<tournament_ptr> won_copy(won), lost_copy(lost), new_won;
-    for(auto lose: lost_copy)
+    std::vector<std::pair<tournament_ptr, int>> lose_with_lost_count;
+    for (auto lose: lost)
     {
+        int lost_count = 0;
+        for(auto win: won)
+        {
+            if(graph.wins(win->get_winner(), lose->get_winner()))
+                lost_count++;
+        }
+        lose_with_lost_count.push_back(std::make_pair(lose, lost_count));
+    }
+    std::sort(lose_with_lost_count.begin(), lose_with_lost_count.end(),
+              [](const std::pair<tournament_ptr, int>& first, 
+                 const std::pair<tournament_ptr, int>& second) -> bool
+        {
+            return first.second > second.second;   
+        });
+    std::set<tournament_ptr> won_copy(won), new_won;
+    for(auto pair: lose_with_lost_count)
+    {
+        auto lose = pair.first;
         for(auto win: won_copy)
         {
             if(won.count(win) && graph.wins(win->get_winner(), 
