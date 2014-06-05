@@ -110,7 +110,9 @@ Tournament::Tournament(const Tournament& first, const Tournament& second)
     this->levels.reserve(first.levels.size() + 1);
     for (int i=0; i<first.levels.size(); ++i)
         this->levels.push_back(new Level(first.levels[i], second.levels[i]));
-    this->levels.push_back(new Level(*first.graph, first.winner, second.winner));
+    this->levels.push_back(new Level(
+        *first.graph, first.winner, second.winner));
+
     this->graph = first.graph;
     if(first.graph->wins(first.winner, second.winner))
         this->winner = first.winner;
