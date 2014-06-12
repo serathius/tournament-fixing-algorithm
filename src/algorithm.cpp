@@ -377,11 +377,20 @@ tournament_ptr _fix_tournament(TournamentGraph& graph,
     if(check_if_fixable(graph, nodes, winner))
     {
         if (check_if_case_A(graph, nodes, winner)) 
+        {
+            printf("A");
             return fix_tournament_A(graph, nodes, winner);
+        }
         else if (check_if_case_B(graph, nodes, winner))
+        {
+            printf("B");
             return fix_tournament_B(graph, nodes, winner);
+        }
         else if (check_if_case_C(graph, nodes, winner))
+        {
+            printf("C");
             return fix_tournament_C(graph, nodes, winner);
+        }
         else
         {   
             int log2n = log2(nodes.size());
@@ -454,6 +463,7 @@ tournament_ptr _fix_tournament(TournamentGraph& graph,
     }
     else
     {
+        printf("N");
         throw TournamentUnfixableError();
     }
 }
